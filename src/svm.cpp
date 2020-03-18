@@ -29,15 +29,14 @@ int main()
 	}
 	auto start = high_resolution_clock::now(); 
 	//Train
-	int num_iters=5000;
+	int num_iters=500000;
 	long double lambda=1.0;
 	for(int iters=1;iters<=num_iters;iters++)
 	{
 		long double lr=1.0/(lambda*iters);
 		// cout << "lr " << lr << endl;
 		int rand_choice=rand()%n_samples;
-		cout << rand_choice << endl;
-		//cout<<rand_choice<<endl;
+		// cout << rand_choice << endl;
 		long double pred_output=0;
 		for(int i=0;i<n_features;i++)
 		{
@@ -59,8 +58,8 @@ int main()
 		}
 	}
 	auto stop = high_resolution_clock::now(); 
-	auto duration = duration_cast<milliseconds>(stop - start); 
-	cout<<"Train Time "<<duration.count() << endl; 
+	auto duration = duration_cast<microseconds>(stop - start); 
+	cout<<"Train Time "<< ((double) duration.count()) / 1e6 << endl; 
 	//Inference
 	long double correct=0.0;
 	for(int i=0;i<n_samples;i++)

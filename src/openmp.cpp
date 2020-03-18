@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
 #include <sys/time.h>
+#include<omp.h>
 using namespace std;
 using namespace std::chrono; 
 double W[505];
@@ -28,6 +29,7 @@ int main()
 	}
 	struct timeval start, end;
 	//Train
+	double start_t = omp_get_wtime();
 	gettimeofday(&start, NULL);
 	int num_iters=500000;
 	double lambda=1.0;
@@ -39,9 +41,12 @@ int main()
 		//cout<<rand_choice<<endl;
 		double pred_output=0;
 
-		for(int i=0;i<n_features;i++)
+		#pragma omp parallel reduction(+:pred_output)
 		{
-			pred_output+=W[i]*X[rand_choice][i];
+			for(int i=0;i<n_features;i++)
+			{
+				pred_output+=W[i]*X[rand_choice][i];
+			}
 		}
 		if( Y[rand_choice]*pred_output >= 1.0)
 		{
@@ -60,10 +65,12 @@ int main()
 			}
 		}
 	}
-	
+
+	double end_t = omp_get_wtime();
+
 	gettimeofday(&end, NULL);	
 	auto delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-	cout<<"Train Time "<<delta << endl; 
+	cout<<"Train Time "<< end_t - start_t << endl; 
 	//Inference
 	double correct=0.0;
 	for(int i=0;i<n_samples;i++)
@@ -77,6 +84,7 @@ int main()
 		if(val*Y[i]>=0)
 			correct+=1;
 	}
+	cout << correct << " " << n_samples << endl;;
 	cout<<correct/n_samples<<endl;
 	return 0;
 }

@@ -50,7 +50,7 @@ if __name__=="__main__":
 			Y[i]=-1
 	copyX=np.array(copyX)
 	X=copyX
-	W=solve(X,Y,lm=1,n_iter=5000)
+	W=solve(X,Y,lm=1,n_iter=500000)
 	#print(W)
 	correct=0
 	total=0
