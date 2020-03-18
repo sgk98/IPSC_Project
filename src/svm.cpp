@@ -1,8 +1,8 @@
 #include<bits/stdc++.h>
 using namespace std;
 using namespace std::chrono; 
-double W[505];
-double X[20005][505];
+long double W[505];
+long double X[20005][505];
 int Y[20005];
 
 int main()
@@ -17,6 +17,8 @@ int main()
 		for(int j=0;j<n_features;j++)
 			trainfile>>X[i][j];
 	}
+	for (int i=0;i<n_samples;i++)	X[i][500] = 0;
+	n_features = 501;
 	for(int i=0;i<n_samples;i++)
 	{
 		labelfile>>Y[i];
@@ -27,15 +29,16 @@ int main()
 	}
 	auto start = high_resolution_clock::now(); 
 	//Train
-	int num_iters=5000000;
-	double lambda=1.0;
+	int num_iters=5000;
+	long double lambda=1.0;
 	for(int iters=1;iters<=num_iters;iters++)
 	{
-		double lr=1.0/(lambda*iters);
-
+		long double lr=1.0/(lambda*iters);
+		// cout << "lr " << lr << endl;
 		int rand_choice=rand()%n_samples;
+		cout << rand_choice << endl;
 		//cout<<rand_choice<<endl;
-		double pred_output=0;
+		long double pred_output=0;
 		for(int i=0;i<n_features;i++)
 		{
 			pred_output+=W[i]*X[rand_choice][i];
@@ -59,10 +62,10 @@ int main()
 	auto duration = duration_cast<milliseconds>(stop - start); 
 	cout<<"Train Time "<<duration.count() << endl; 
 	//Inference
-	double correct=0.0;
+	long double correct=0.0;
 	for(int i=0;i<n_samples;i++)
 	{
-		double val=0.0;
+		long double val=0.0;
 		for(int j=0;j<n_features;j++)
 		{
 			val+=W[j]*X[i][j];

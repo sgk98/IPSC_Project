@@ -12,7 +12,7 @@ def solve(X,Y,lm,n_iter=100):
 	choices = fobj.readlines()
 	for it in range(n_iter):
 		eta=1.0/(lm*(it+1))
-		choice=int(choices[6*it])
+		choice=int(choices[it])
 		print (choice)
 		x,y=X[choice],Y[choice]
 		out = 0
