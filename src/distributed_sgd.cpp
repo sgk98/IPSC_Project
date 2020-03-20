@@ -55,16 +55,16 @@ int main()
 		
     }
     
-    
+	if(world_rank==0)
+	{
+		t1=MPI_Wtime(); 
+	}    
     MPI_Bcast(&num_per_procs,1,MPI_INT,0,MPI_COMM_WORLD);
     MPI_Bcast(&n_samples,1,MPI_INT,0,MPI_COMM_WORLD);
     MPI_Bcast(&n_features,1,MPI_INT,0,MPI_COMM_WORLD);
 	MPI_Scatter(allX,505*num_per_procs,MPI_DOUBLE,X,505*num_per_procs,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Scatter(allX,505*num_per_procs,MPI_DOUBLE,X,505*num_per_procs,MPI_DOUBLE,0,MPI_COMM_WORLD);
-	if(world_rank==0)
-	{
-		t1=MPI_Wtime(); 
-	}
+
 	
 	double lambda=1.0;
 	for(int iters=0;iters<num_per_procs;iters++)
@@ -96,14 +96,14 @@ int main()
 			}
 		}
 	}
+
+	//MPI_Gather(W,505,MPI_DOUBLE,finalW,505,MPI_DOUBLE,0,MPI_COMM_WORLD);
+	cerr<<"Done training"<<endl;
+	MPI_Reduce(W, finalW,505, MPI_DOUBLE, MPI_SUM, 0,MPI_COMM_WORLD);
 	if(world_rank==0)
 	{
 		t2 = MPI_Wtime(); 
 	}
-	//MPI_Gather(W,505,MPI_DOUBLE,finalW,505,MPI_DOUBLE,0,MPI_COMM_WORLD);
-	cerr<<"Done training"<<endl;
-	MPI_Reduce(W, finalW,505, MPI_DOUBLE, MPI_SUM, 0,MPI_COMM_WORLD);
-
 	
 	//Inference
 	if(world_rank==0)
