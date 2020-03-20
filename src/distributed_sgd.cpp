@@ -52,17 +52,15 @@ int main()
 				allY[i]=-1;
 			}
 		}
-		cerr<<"Read Input"<<endl;
+		
     }
     
     
     MPI_Bcast(&num_per_procs,1,MPI_INT,0,MPI_COMM_WORLD);
     MPI_Bcast(&n_samples,1,MPI_INT,0,MPI_COMM_WORLD);
     MPI_Bcast(&n_features,1,MPI_INT,0,MPI_COMM_WORLD);
-    cerr<<"Data to be sent"<<endl;
 	MPI_Scatter(allX,505*num_per_procs,MPI_DOUBLE,X,505*num_per_procs,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Scatter(allX,505*num_per_procs,MPI_DOUBLE,X,505*num_per_procs,MPI_DOUBLE,0,MPI_COMM_WORLD);
-    cerr<<"Broadcasts Done"<<endl;
 	if(world_rank==0)
 	{
 		t1=MPI_Wtime(); 
