@@ -103,7 +103,7 @@ int main()
 		{
 			for(int i=0;i<n_features;i++)
 			{
-				W[i]=(1.0 - lr*lambda)*W[i] + (lr*Y[rand_choice])*X[rand_choice][i];
+				W[i]=(1.0 - lr*lambda)*W[i] + sign_function((Y[rand_choice])*X[rand_choice][i]);
 			}
 		}
 	}
