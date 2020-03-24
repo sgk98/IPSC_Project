@@ -12,18 +12,17 @@ def solve(X,Y,lm,n_iter=100):
 	choices = fobj.readlines()
 	for it in range(n_iter):
 		eta=1.0/(lm*(it+1))
-		choice=int(choices[4*it])
+		choice=int(choices[it])
 		print (choice)
 		x,y=X[choice],Y[choice]
 		out = 0
 		out=np.dot(W.T,x)
-		print("res ", out)
-		print("check ", y*out)
+		# print("res ", out)
 		if y*out >= 1:
 			W = (1-eta*lm)*W
 		else:
 			W = (1-eta*lm)*W + (eta*y)*x
-		print ("W[0] W[1] ", W[0], W[1])
+		# print ("W[0] W[1] ", W[0], W[1])
 
 	return W
 
@@ -63,7 +62,7 @@ if __name__=="__main__":
 		if res*Y[i]>=0:
 			correct+=1.0
 		total+=1.0
-	print (correct)
+	print ("Correct ", correct)
 	print("Accuracy ", correct/total)
 
 

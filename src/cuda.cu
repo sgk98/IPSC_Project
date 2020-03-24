@@ -24,7 +24,7 @@ __device__ double atomicAddDouble(double* address, double val)
     unsigned long long int old = *address_as_ull, assumed;
     do {
         assumed = old;
-	old = atomicCAS(address_as_ull, assumed,
+	    old = atomicCAS(address_as_ull, assumed,
         __double_as_longlong(val + __longlong_as_double(assumed)));
     } while (assumed != old);
     return __longlong_as_double(old);
@@ -91,23 +91,14 @@ int main() {
  	    cudaMemcpy(d_res, res, sizeof(double), cudaMemcpyHostToDevice);
  	    dot<<<numBlocks, BLOCK_SIZE>>>(n_features, d_W, d_X, rand_choice, d_res, n_features);
  	    cudaMemcpy(res, d_res, sizeof(double), cudaMemcpyDeviceToHost);
-        // for (int i=0;i<n_features;i++)   res[0] += (W[i] * X[rand_choice * n_features + i]);
-        cout << "res " << res[0] << endl;
-        cout << "check " << Y[rand_choice] * res[0] << endl;
 	    if (Y[rand_choice] * res[0] >= 1.0)
 	        type1<<<numBlocks, BLOCK_SIZE>>>(n_features, lr, lambda, d_W);
 	    else
 	        type2<<<numBlocks, BLOCK_SIZE>>>(n_features, lr, lambda, d_W, rand_choice, d_X, d_Y, n_features);
-
         cudaMemcpy(W, d_W, n_features * sizeof(double), cudaMemcpyDeviceToHost);
-        cout << "after W[0] W[1]" << W[0] << " " << W[1] << endl;        
-        }
-
+    }
     cudaMemcpy(W, d_W, n_features * sizeof(double), cudaMemcpyDeviceToHost);
     
-   
-//    for (int i=0;i<n_features;i++)	cout << W[i] << " ";
-//	cout << endl;
     printf("Train time\n"); // TODO
     double correct = 0.0;
     for (int i=0;i<n_samples;i++) {
@@ -117,7 +108,7 @@ int main() {
         if (val * Y[i] >= 0)
             correct += 1;
     }
-    cout << correct << endl;
+    cout << "Correct " << correct << endl;
     printf("Accuracy %lf\n", correct / n_samples);
     return 0;
 }
