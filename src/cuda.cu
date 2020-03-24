@@ -10,11 +10,11 @@ __global__ void type1(int n, double lr, double lambda, double * W) {
     }
 }
 
-__global__ void type2(int n, double lr, double lambda, double * W, int rand_choice, double * X, double * Y, int n_features) {
+__global__ void type2(int n, double lr, double lambda, double * W, int rand_choice, double * X, double * Y) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
     for (int i=index;i<n;i+=stride) {
-        W[i] = (1.0 - lr* lambda) * W[i] + (lr * Y[rand_choice])*X[rand_choice * n_features + i];
+        W[i] = (1.0 - lr* lambda) * W[i] + (lr * Y[rand_choice])*X[rand_choice * n + i];
     }
 }
 
@@ -30,10 +30,11 @@ __device__ double atomicAddDouble(double* address, double val)
     return __longlong_as_double(old);
 }
 
-__global__ void dot(int n, double * W, double *X, int rand_choice, double * res, int n_features) {
+__global__ void dot(int n, double * W, double *X, int rand_choice, double * res) {
    __shared__ double temp[BLOCK_SIZE];
    int index = blockIdx.x * blockDim.x + threadIdx.x;
-   temp[threadIdx.x] = W[index] * X[rand_choice * n_features + index];
+   if (index < n)   temp[threadIdx.x] = W[index] * X[rand_choice * n + index];
+   else             temp[threadIdx.x] = 0;
    __syncthreads();
    if (threadIdx.x == 0){
        double sum = 0;
@@ -52,6 +53,8 @@ int main() {
 
     double *W, *X, *Y, *res;
     double *d_W, *d_X, *d_Y, *d_res;
+    cudaEvent_t start, stop;
+    float elapsedTime;
     
     W = (double *) malloc(n_features * sizeof(double));
     X = (double *) malloc(n_samples * n_features * sizeof(double));
@@ -82,6 +85,8 @@ int main() {
 
     int num_iters = 100;
     double lambda = 1.0;
+    cudaEventCreate(&start);
+    cudaEventRecord(start,0);
     for (int iters=1;iters<=num_iters;iters++) {
     	int numBlocks = (n_features + BLOCK_SIZE - 1) / BLOCK_SIZE;
         double lr = 1.0 / (lambda * iters);
@@ -89,17 +94,22 @@ int main() {
         cout << rand_choice << endl;
  	   	*res = 0;
  	    cudaMemcpy(d_res, res, sizeof(double), cudaMemcpyHostToDevice);
- 	    dot<<<numBlocks, BLOCK_SIZE>>>(n_features, d_W, d_X, rand_choice, d_res, n_features);
+ 	    dot<<<numBlocks, BLOCK_SIZE>>>(n_features, d_W, d_X, rand_choice, d_res);
  	    cudaMemcpy(res, d_res, sizeof(double), cudaMemcpyDeviceToHost);
 	    if (Y[rand_choice] * res[0] >= 1.0)
 	        type1<<<numBlocks, BLOCK_SIZE>>>(n_features, lr, lambda, d_W);
 	    else
-	        type2<<<numBlocks, BLOCK_SIZE>>>(n_features, lr, lambda, d_W, rand_choice, d_X, d_Y, n_features);
+	        type2<<<numBlocks, BLOCK_SIZE>>>(n_features, lr, lambda, d_W, rand_choice, d_X, d_Y);
         cudaMemcpy(W, d_W, n_features * sizeof(double), cudaMemcpyDeviceToHost);
     }
     cudaMemcpy(W, d_W, n_features * sizeof(double), cudaMemcpyDeviceToHost);
     
-    printf("Train time\n"); // TODO
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop,0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&elapsedTime, start,stop);
+
+    cout << "Train time " << elapsedTime << endl;
     double correct = 0.0;
     for (int i=0;i<n_samples;i++) {
         double val = 0.0;
